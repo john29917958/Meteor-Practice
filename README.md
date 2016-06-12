@@ -1,2 +1,2 @@
 # Meteor-Practice
-My repository used to give Meteor.js a try.
+My repository for giving Meteor.js a try.
