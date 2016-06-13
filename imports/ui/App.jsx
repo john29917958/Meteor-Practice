@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import ReactDOM from 'react-dom';
+import { Meteor } from 'meteor/meteor';
 import { createContainer } from 'meteor/react-meteor-data';
 
 import { Tasks } from '../api/tasks.js';
@@ -33,14 +34,24 @@ class App extends Component {
   }
 
   renderTasks() {
-    var filteredTasks = this.props.tasks;
+    var filteredTasks = this.props.tasks,
+        self = this;
 
     if (this.state.hideCompleted) {
       filteredTasks = filteredTasks.filter(task => !task.checked);
     }
 
     return filteredTasks.map(function (task) {
-      return <Task key={task._id} task={task} />
+      const currentUserId = self.props.currentUser && self.props.currentUser._id;
+      const showPrivateButton = task.owner === currentUserId;
+
+      return (
+        <Task
+          key={task._id}
+          task={task}
+          showPrivateButton={showPrivateButton}
+        />
+      );
     });
   }
 
@@ -79,6 +90,8 @@ App.propTypes = {
 };
 
 export default createContainer(function () {
+  Meteor.subscribe('tasks');
+
   return {
     tasks: Tasks.find({}, { sort: { createdAt: -1 } }).fetch(),
     incompleteCount: Tasks.find({ checked: { $ne: true } }).count(),
